@@ -1,0 +1,2 @@
+nationstates-resolutions-database
+=================================
