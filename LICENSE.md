@@ -1,31 +1,3 @@
-# NationStates World Assembly Resolutions Database #
-
-## Overview ##
-NationStates World Assembly Resolutions Database consists of:
-
-* an Access database containing information on every General Assembly resolution ever passed, and
-* a C# command line application that generates statistical information based on the information stored in the database.
-
-## Documentation ##
-
-### System Requirements ###
-* The [.NET Framework 4.5](http://www.microsoft.com/en-ca/download/details.aspx?id=30653)
-
-### Help ###
-
-No help is available.
-
-## Downloads ##
-
-Source code downloads are available from [the project's GitHub page](https://github.com/auralia/nationstates-resolutions-database).
-
-No binary downloads are available.
-
-## Changelog ##
-* Version 0.1:
-	* Initial public release
-
-## Copyright and License ##
 Copyright (C) 2014 Auralia.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
