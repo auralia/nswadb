@@ -1,10 +1,10 @@
 # NationStates World Assembly Resolutions Database #
 
 ## Overview ##
-NationStates World Assembly Resolutions Database consists of:
+NationStates World Assembly Resolutions Database is a free and open source:
 
-* an Access database containing information on every General Assembly resolution ever passed, and
-* a C# command line application that generates statistical information based on the information stored in the database.
+* Access database containing information on every General Assembly resolution ever passed, and
+* C# command line application that generates statistical information based on the information stored in the database.
 
 ## Documentation ##
 

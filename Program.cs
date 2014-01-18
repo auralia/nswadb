@@ -37,7 +37,11 @@ namespace Auralia.NationStates.ResolutionsDatabase
         {
             var prog = new Program();
             prog.generateGeneralAssemblyAuthorIndex();
-            prog.generateGeneralAssemblyAuthorTable();
+
+            prog.generateGeneralAssemblyAuthorTable(OrderType.Author);
+            prog.generateGeneralAssemblyAuthorTable(OrderType.Total);
+            prog.generateGeneralAssemblyAuthorTable(OrderType.ActiveTotal);
+            prog.generateGeneralAssemblyAuthorTable(OrderType.RepealedTotal);
         }
 
         public void getDataSet()
@@ -201,12 +205,35 @@ namespace Auralia.NationStates.ResolutionsDatabase
             file.Close();
         }
 
-        public void generateGeneralAssemblyAuthorTable()
+        public enum OrderType
         {
-            authors = authors.OrderBy(o => o.Name).ToList();
-            authors.Reverse();
-            authors = authors.OrderBy(o => o.repealedTotal).ToList();
-            authors.Reverse();
+            Author = 1,
+            Total = 2,
+            ActiveTotal = 3,
+            RepealedTotal = 4
+        }
+
+        public void generateGeneralAssemblyAuthorTable(OrderType orderType)
+        {
+            if (orderType == OrderType.Author)
+            {
+                authors = authors.OrderBy(o => o.Name).ToList();
+            }
+            else if (orderType == OrderType.Total)
+            {
+                authors = authors.OrderBy(o => o.Name).ToList();
+                authors = authors.OrderByDescending(o => o.total).ToList();
+            }
+            else if (orderType == OrderType.ActiveTotal)
+            {
+                authors = authors.OrderBy(o => o.Name).ToList();
+                authors = authors.OrderByDescending(o => o.activeTotal).ToList();
+            }
+            else if (orderType == OrderType.RepealedTotal)
+            {
+                authors = authors.OrderBy(o => o.Name).ToList();
+                authors = authors.OrderByDescending(o => o.repealedTotal).ToList();
+            }
 
             var bbcode = "[table]";
 
@@ -253,7 +280,7 @@ namespace Auralia.NationStates.ResolutionsDatabase
             }
             bbcode += "[/table]";
 
-            StreamWriter file = new StreamWriter(OUTPUT_PATH + "\\table.txt");
+            StreamWriter file = new StreamWriter(OUTPUT_PATH + "\\table-" + (int)orderType + ".txt");
             file.Write(bbcode);
             file.Close();
         }
