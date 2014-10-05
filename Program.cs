@@ -66,7 +66,7 @@ namespace Auralia.NationStates.ResolutionsDatabase
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
                 object[] resolutionData = row.ItemArray;
-
+                
                 var resolution = new Resolution();
                 resolution.Number = (int)resolutionData[0];
                 resolution.Title = (string)resolutionData[1];
@@ -74,10 +74,12 @@ namespace Auralia.NationStates.ResolutionsDatabase
                 resolution.Subcategory = (string)resolutionData[3];
                 resolution.Author = (string)resolutionData[4];
                 resolution.Coauthor = resolutionData[5] == DBNull.Value ? null : (string)resolutionData[5];
-                resolution.IsRepealed = (bool)resolutionData[6];
-                resolution.VotesFor = (int)resolutionData[7];
-                resolution.VotesAgainst = (int)resolutionData[8];
-                resolution.DateImplemented = (DateTime)resolutionData[9];
+                resolution.PlayerAuthor = resolutionData[6] == DBNull.Value ? null : (string)resolutionData[6];
+                resolution.PlayerCoauthor = resolutionData[7] == DBNull.Value ? null : (string)resolutionData[7];
+                resolution.IsRepealed = (bool)resolutionData[8];
+                resolution.VotesFor = (int)resolutionData[9];
+                resolution.VotesAgainst = (int)resolutionData[10];
+                resolution.DateImplemented = (DateTime)resolutionData[11];
 
                 resolutions.Add(resolution);
             }
@@ -93,17 +95,34 @@ namespace Auralia.NationStates.ResolutionsDatabase
             {
                 Author author = null;
                 Author coauthor = null;
+                Author playerAuthor = null;
+                Author playerCoauthor = null;
 
                 foreach (Author auth in authors)
                 {
-                    if (auth.Name.Equals(resolution.Author))
+                    if (!auth.isPlayer)
                     {
-                        author = auth;
-                    }
+                        if (auth.Name.Equals(resolution.Author))
+                        {
+                            author = auth;
+                        }
 
-                    if (resolution.Coauthor != null && auth.Name.Equals(resolution.Coauthor))
+                        if (resolution.Coauthor != null && auth.Name.Equals(resolution.Coauthor))
+                        {
+                            coauthor = auth;
+                        }
+                    }
+                    else
                     {
-                        coauthor = auth;
+                        if (resolution.PlayerAuthor != null && auth.Name.Equals(resolution.PlayerAuthor))
+                        {
+                            playerAuthor = auth;
+                        }
+
+                        if (resolution.PlayerCoauthor != null && auth.Name.Equals(resolution.PlayerCoauthor))
+                        {
+                            playerCoauthor = auth;
+                        }
                     }
                 }
 
@@ -117,11 +136,32 @@ namespace Auralia.NationStates.ResolutionsDatabase
                     coauthor = new Author(resolution.Coauthor);
                     authors.Add(coauthor);
                 }
+                if (playerAuthor == null && resolution.PlayerAuthor != null)
+                {
+                    playerAuthor = new Author(resolution.PlayerAuthor);
+                    playerAuthor.isPlayer = true;
+                    authors.Add(playerAuthor);
+                }
+                if (playerCoauthor == null && resolution.PlayerCoauthor != null)
+                {
+                    playerCoauthor = new Author(resolution.PlayerCoauthor);
+                    playerCoauthor.isPlayer = true;
+                    authors.Add(playerCoauthor);
+                }
 
                 author.Resolutions.Add(resolution);
                 if (coauthor != null)
                 {
                     coauthor.Resolutions.Add(resolution);
+                }
+                if (playerAuthor != null)
+                {
+                    playerAuthor.Resolutions.Add(resolution);
+
+                }
+                if (playerCoauthor != null)
+                {
+                    playerCoauthor.Resolutions.Add(resolution);
                 }
             }
 
@@ -129,34 +169,70 @@ namespace Auralia.NationStates.ResolutionsDatabase
             {
                 foreach (Resolution resolution in author.Resolutions)
                 {
-                    if (resolution.IsRepealed)
+                    if (author.isPlayer)
                     {
-                        if (resolution.Author.Equals(author.Name) && resolution.Coauthor == null)
+                        if (resolution.IsRepealed)
                         {
-                            author.repealedAuthor += 1;
+                            if (resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
+                            {
+                                author.repealedAuthor += 1;
+                            }
+                            else if (resolution.PlayerAuthor.Equals(author.Name))
+                            {
+                                author.repealedSubmittingCoauthor += 1;
+                            }
+                            else if (resolution.PlayerCoauthor.Equals(author.Name))
+                            {
+                                author.repealedNonsubmittingCoauthor += 1;
+                            }
                         }
-                        else if (resolution.Author.Equals(author.Name))
+                        else
                         {
-                            author.repealedSubmittingCoauthor += 1;
-                        }
-                        else if (resolution.Coauthor.Equals(author.Name))
-                        {
-                            author.repealedNonsubmittingCoauthor += 1;
+                            if (resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
+                            {
+                                author.activeAuthor += 1;
+                            }
+                            else if (resolution.PlayerAuthor.Equals(author.Name))
+                            {
+                                author.activeSubmittingCoauthor += 1;
+                            }
+                            else if (resolution.PlayerCoauthor.Equals(author.Name))
+                            {
+                                author.activeNonsubmittingCoauthor += 1;
+                            }
                         }
                     }
                     else
                     {
-                        if (resolution.Author.Equals(author.Name) && resolution.Coauthor == null)
+                        if (resolution.IsRepealed)
                         {
-                            author.activeAuthor += 1;
+                            if (resolution.Author.Equals(author.Name) && resolution.Coauthor == null)
+                            {
+                                author.repealedAuthor += 1;
+                            }
+                            else if (resolution.Author.Equals(author.Name))
+                            {
+                                author.repealedSubmittingCoauthor += 1;
+                            }
+                            else if (resolution.Coauthor.Equals(author.Name))
+                            {
+                                author.repealedNonsubmittingCoauthor += 1;
+                            }
                         }
-                        else if (resolution.Author.Equals(author.Name))
+                        else
                         {
-                            author.activeSubmittingCoauthor += 1;
-                        }
-                        else if (resolution.Coauthor.Equals(author.Name))
-                        {
-                            author.activeNonsubmittingCoauthor += 1;
+                            if (resolution.Author.Equals(author.Name) && resolution.Coauthor == null)
+                            {
+                                author.activeAuthor += 1;
+                            }
+                            else if (resolution.Author.Equals(author.Name))
+                            {
+                                author.activeSubmittingCoauthor += 1;
+                            }
+                            else if (resolution.Coauthor.Equals(author.Name))
+                            {
+                                author.activeNonsubmittingCoauthor += 1;
+                            }
                         }
                     }
                 }
@@ -171,33 +247,73 @@ namespace Auralia.NationStates.ResolutionsDatabase
 
             foreach (var author in authors)
             {
-                bbcode += "[b][nation]" + author.Name + "[/nation][/b]" + Environment.NewLine;
+                if (author.isPlayer)
+                {
+                    bbcode += "[b][PLAYER] [nation]" + author.Name + "[/nation][/b]" + Environment.NewLine;
+                }
+                else
+                {
+                    bbcode += "[b][nation]" + author.Name + "[/nation][/b]" + Environment.NewLine;
+                }
+
+                
                 bbcode += "[list]";
 
                 foreach (Resolution resolution in resolutions)
                 {
-                    if (resolution.Author.Equals(author.Name) || (resolution.Coauthor != null && resolution.Coauthor.Equals(author.Name)))
+                    if (author.isPlayer)
                     {
-                        string entry = "[url=http://www.nationstates.net/page=WA_past_resolutions/council=1/start=" + (resolution.Number - 1) + "]" + resolution.Title + "[/url]";
-
-                        if (resolution.IsRepealed)
+                        if ((resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name)) || (resolution.PlayerCoauthor != null && resolution.PlayerCoauthor.Equals(author.Name)))
                         {
-                            entry = "[strike]" + entry + "[/strike]";
-                        }
+                            string entry = "[url=http://www.nationstates.net/page=WA_past_resolutions/council=1/start=" + (resolution.Number - 1) + "]" + resolution.Title + "[/url]";
 
-                        if (resolution.Coauthor != null && resolution.Coauthor.Equals(author.Name))
-                        {
-                            entry += " (non-submitting co-author)";
-                        }
-                        else if (resolution.Coauthor != null)
-                        {
-                            entry += " (submitting co-author)";
-                        }
+                            if (resolution.IsRepealed)
+                            {
+                                entry = "[strike]" + entry + "[/strike]";
+                            }
 
-                        bbcode += "[*]" + entry + Environment.NewLine;
+                            if (resolution.PlayerCoauthor != null && resolution.PlayerCoauthor.Equals(author.Name))
+                            {
+                                entry += " (non-submitting co-author)";
+                            }
+                            else if (resolution.PlayerCoauthor != null || resolution.Coauthor != null)
+                            {
+                                entry += " (submitting co-author)";
+                            }
+
+                            bbcode += "[*]" + entry + Environment.NewLine;
+                        }
+                    }
+                    else
+                    {
+                        if (resolution.Author.Equals(author.Name) || (resolution.Coauthor != null && resolution.Coauthor.Equals(author.Name)))
+                        {
+                            string entry = "[url=http://www.nationstates.net/page=WA_past_resolutions/council=1/start=" + (resolution.Number - 1) + "]" + resolution.Title + "[/url]";
+
+                            if (resolution.IsRepealed)
+                            {
+                                entry = "[strike]" + entry + "[/strike]";
+                            }
+
+                            if (resolution.Coauthor != null && resolution.Coauthor.Equals(author.Name))
+                            {
+                                entry += " (non-submitting co-author)";
+                            }
+                            else if (resolution.Coauthor != null)
+                            {
+                                entry += " (submitting co-author)";
+                            }
+
+                            bbcode += "[*]" + entry + Environment.NewLine;
+                        }
                     }
                 }
                 bbcode += "[/list]" + Environment.NewLine + Environment.NewLine;
+            }
+
+            if (!System.IO.Directory.Exists(OUTPUT_PATH))
+            {
+                System.IO.Directory.CreateDirectory(OUTPUT_PATH);
             }
 
             StreamWriter file = new StreamWriter(OUTPUT_PATH + "\\index.txt");
@@ -266,7 +382,14 @@ namespace Auralia.NationStates.ResolutionsDatabase
             foreach (Author author in authors)
             {
                 bbcode += "[tr]";
-                bbcode += "[td][nation]" + author.Name + "[/nation][/td]";
+                if (author.isPlayer)
+                {
+                    bbcode += "[td][PLAYER] [nation]" + author.Name + "[/nation][/td]";
+                }
+                else
+                {
+                    bbcode += "[td][nation]" + author.Name + "[/nation][/td]";
+                }
                 bbcode += "[td]" + author.activeAuthor + "[/td]";
                 bbcode += "[td]" + author.activeSubmittingCoauthor + "[/td]";
                 bbcode += "[td]" + author.activeNonsubmittingCoauthor + "[/td]";

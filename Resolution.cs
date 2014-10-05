@@ -44,6 +44,18 @@ namespace Auralia.NationStates.ResolutionsDatabase
             set;
         }
 
+        public string PlayerAuthor
+        {
+            get;
+            set;
+        }
+
+        public string PlayerCoauthor
+        {
+            get;
+            set;
+        }
+
         public bool IsRepealed
         {
             get;

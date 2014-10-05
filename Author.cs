@@ -52,11 +52,18 @@ namespace Auralia.NationStates.ResolutionsDatabase
             }
         }
 
+        public bool isPlayer
+        {
+            get;
+            set;
+        }
+
 
         public Author(string name)
         {
             this.Name = name;
             this.Resolutions = new List<Resolution>();
+            this.isPlayer = false;
         }
     }
 }

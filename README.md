@@ -22,9 +22,13 @@ Source code downloads are available from [the project's GitHub page](https://git
 No binary downloads are available.
 
 ## Changelog ##
+
+* Version 0.2:
+	* Updated database to GAR #304
+	* Updated application to support player entries
 * Version 0.1:
 	* Initial public release
-
+	
 ## Copyright and License ##
 Copyright (C) 2014 Auralia.
 
