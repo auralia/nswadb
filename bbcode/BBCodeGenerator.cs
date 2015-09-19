@@ -176,11 +176,11 @@ namespace Auralia.NationStates.ResolutionsDatabase
                     {
                         if (resolution.IsRepealed)
                         {
-                            if (resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
+                            if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
                             {
                                 author.repealedAuthor += 1;
                             }
-                            else if (resolution.PlayerAuthor.Equals(author.Name))
+                            else if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name))
                             {
                                 author.repealedSubmittingCoauthor += 1;
                             }
@@ -191,11 +191,11 @@ namespace Auralia.NationStates.ResolutionsDatabase
                         }
                         else
                         {
-                            if (resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
+                            if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
                             {
                                 author.activeAuthor += 1;
                             }
-                            else if (resolution.PlayerAuthor.Equals(author.Name))
+                            else if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name))
                             {
                                 author.activeSubmittingCoauthor += 1;
                             }
