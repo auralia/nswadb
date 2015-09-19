@@ -7,8 +7,8 @@
     <ProjectGuid>{8A43A65D-3982-4D2F-B480-D7D2F9704A8B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Auralia.NationStates.ResolutionsDatabase</RootNamespace>
-    <AssemblyName>NationStates World Assembly Resolutions Database</AssemblyName>
+    <RootNamespace>Auralia.NationStates.GaResolutionsDatabase</RootNamespace>
+    <AssemblyName>NationStates GA Resolutions Database</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Author.cs" />
-    <Compile Include="BBCodeGenerator.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resolution.cs" />
   </ItemGroup>

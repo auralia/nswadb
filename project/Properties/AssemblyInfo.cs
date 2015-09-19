@@ -1,17 +1,22 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿//-----------------------------------------------------------------------
+// <copyright file="AssemblyInfo.cs" company="Auralia">
+//     Copyright (C) 2014-2015 Auralia
+// </copyright>
+//-----------------------------------------------------------------------
+
+using System.Reflection;
 using System.Resources;
+using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NationStates World Assembly Resolutions Database")]
+[assembly: AssemblyTitle("NationStates GA Resolutions Database")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Auralia")]
-[assembly: AssemblyProduct("NationStates World Assembly Resolutions Database")]
-[assembly: AssemblyCopyright("Copyright © 2013 Auralia")]
+[assembly: AssemblyProduct("NationStates GA Resolutions Database")]
+[assembly: AssemblyCopyright("Copyright © 2014-2015 Auralia")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

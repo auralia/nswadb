@@ -1,72 +1,144 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.OleDb;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="Auralia">
+//     Copyright (C) 2014-2015 Auralia
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Auralia.NationStates.ResolutionsDatabase
+namespace Auralia.NationStates.GaResolutionsDatabase
 {
-    class BBCodeGenerator
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Data.OleDb;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    
+    /// <summary>
+    /// The main class of the program.
+    /// </summary>
+    public class Program
     {
-        public string DATABASE_PATH;
-        public string OUTPUT_PATH;
-        public string DATABASE_CONNECTION_STRING;
-        public string DATABASE_COMMAND;
+        /// <summary>
+        /// The path to the resolutions database.
+        /// </summary>
+        private string databasePath;
 
-        DataSet dataSet;
-        List<Resolution> resolutions;
-        List<Author> authors;
+        /// <summary>
+        /// The path to the BBCode output folder.
+        /// </summary>
+        private string outputPath;
 
-        public BBCodeGenerator()
+        /// <summary>
+        /// The database connection string.
+        /// </summary>
+        private string databaseConnectionString;
+
+        /// <summary>
+        /// The command to retrieve all of the resolutions from the database.
+        /// </summary>
+        private string databaseCommand;
+
+        /// <summary>
+        /// The data set used to store information from the database.
+        /// </summary>
+        private DataSet dataSet;
+
+        /// <summary>
+        /// A list of all General Assembly resolutions.
+        /// </summary>
+        private List<Resolution> resolutions;
+
+        /// <summary>
+        /// A list of all General Assembly resolution authors.
+        /// </summary>
+        private List<Author> authors;
+
+        /// <summary>
+        /// Initializes a new instance of the Program class.
+        /// </summary>
+        public Program()
         {
-            DATABASE_PATH = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\..\\..\\..\\database\\resolutions.mdb";
-            OUTPUT_PATH = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\..\\..\\out\\";
-            DATABASE_CONNECTION_STRING = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + DATABASE_PATH;
-            DATABASE_COMMAND = "SELECT * FROM RESOLUTIONS";
+            this.databasePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\..\\..\\..\\database\\resolutions.mdb";
+            this.outputPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\..\\..\\out\\";
+            this.databaseConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + this.databasePath;
+            this.databaseCommand = "SELECT * FROM RESOLUTIONS";
 
-            getDataSet();
-            getResolutions();
-            getAuthors();
+            this.GetDataSet();
+            this.GetResolutions();
+            this.GetAuthors();
         }
 
+        /// <summary>
+        /// The order type of the resolutions table.
+        /// </summary>
+        private enum OrderType
+        {
+            /// <summary>
+            /// Order the table by author name (alphabetical).
+            /// </summary>
+            Author = 1,
+
+            /// <summary>
+            /// Order the table by total number of resolutions passed.
+            /// </summary>
+            Total = 2,
+
+            /// <summary>
+            /// Order the table by total number of active resolutions passed.
+            /// </summary>
+            ActiveTotal = 3,
+
+            /// <summary>
+            /// Order the table by total number of repealed resolutions passed.
+            /// </summary>
+            RepealedTotal = 4
+        }
+
+        /// <summary>
+        /// Runs the application.
+        /// </summary>
+        /// <param name="args">Command line arguments passed to the application.</param>
         public static void Main(string[] args)
         {
-            var prog = new BBCodeGenerator();
-            prog.generateGeneralAssemblyAuthorIndex();
+            var prog = new Program();
+            prog.GenerateGeneralAssemblyAuthorIndex();
 
-            prog.generateGeneralAssemblyAuthorTable(OrderType.Author);
-            prog.generateGeneralAssemblyAuthorTable(OrderType.Total);
-            prog.generateGeneralAssemblyAuthorTable(OrderType.ActiveTotal);
-            prog.generateGeneralAssemblyAuthorTable(OrderType.RepealedTotal);
+            prog.GenerateGeneralAssemblyAuthorTable(OrderType.Author);
+            prog.GenerateGeneralAssemblyAuthorTable(OrderType.Total);
+            prog.GenerateGeneralAssemblyAuthorTable(OrderType.ActiveTotal);
+            prog.GenerateGeneralAssemblyAuthorTable(OrderType.RepealedTotal);
 
             Console.WriteLine("BBCode list and tables generation complete.");
             Console.ReadKey();
         }
 
-        public void getDataSet()
+        /// <summary>
+        /// Gets the data set from the database.
+        /// </summary>
+        private void GetDataSet()
         {
-            var connection = new OleDbConnection(DATABASE_CONNECTION_STRING);
+            var connection = new OleDbConnection(this.databaseConnectionString);
             connection.Open();
 
-            var command = new OleDbCommand(DATABASE_COMMAND, connection);
+            var command = new OleDbCommand(this.databaseCommand, connection);
 
             var dataAdapter = new OleDbDataAdapter(command);
 
-            dataSet = new DataSet();
-            dataAdapter.Fill(dataSet);
+            this.dataSet = new DataSet();
+            dataAdapter.Fill(this.dataSet);
 
             connection.Close();
         }
 
-        public void getResolutions()
+        /// <summary>
+        /// Gets the resolutions from the data set.
+        /// </summary>
+        private void GetResolutions()
         {
-            resolutions = new List<Resolution>();
+            this.resolutions = new List<Resolution>();
 
-            foreach (DataRow row in dataSet.Tables[0].Rows)
+            foreach (DataRow row in this.dataSet.Tables[0].Rows)
             {
                 object[] resolutionData = row.ItemArray;
                 
@@ -84,26 +156,29 @@ namespace Auralia.NationStates.ResolutionsDatabase
                 resolution.VotesAgainst = (int)resolutionData[10];
                 resolution.DateImplemented = (DateTime)resolutionData[11];
 
-                resolutions.Add(resolution);
+                this.resolutions.Add(resolution);
             }
 
-            resolutions = resolutions.OrderBy(o => o.Number).ToList();
+            this.resolutions = this.resolutions.OrderBy(o => o.Number).ToList();
         }
 
-        public void getAuthors()
+        /// <summary>
+        /// Gets the authors from the resolutions.
+        /// </summary>
+        private void GetAuthors()
         {
-            authors = new List<Author>();
+            this.authors = new List<Author>();
 
-            foreach (Resolution resolution in resolutions)
+            foreach (Resolution resolution in this.resolutions)
             {
                 Author author = null;
                 Author coauthor = null;
                 Author playerAuthor = null;
                 Author playerCoauthor = null;
 
-                foreach (Author auth in authors)
+                foreach (Author auth in this.authors)
                 {
-                    if (!auth.isPlayer)
+                    if (!auth.IsPlayer)
                     {
                         if (auth.Name.Equals(resolution.Author))
                         {
@@ -132,76 +207,81 @@ namespace Auralia.NationStates.ResolutionsDatabase
                 if (author == null)
                 {
                     author = new Author(resolution.Author);
-                    authors.Add(author);
+                    this.authors.Add(author);
                 }
+
                 if (coauthor == null && resolution.Coauthor != null)
                 {
                     coauthor = new Author(resolution.Coauthor);
-                    authors.Add(coauthor);
+                    this.authors.Add(coauthor);
                 }
+
                 if (playerAuthor == null && resolution.PlayerAuthor != null)
                 {
                     playerAuthor = new Author(resolution.PlayerAuthor);
-                    playerAuthor.isPlayer = true;
-                    authors.Add(playerAuthor);
+                    playerAuthor.IsPlayer = true;
+                    this.authors.Add(playerAuthor);
                 }
+
                 if (playerCoauthor == null && resolution.PlayerCoauthor != null)
                 {
                     playerCoauthor = new Author(resolution.PlayerCoauthor);
-                    playerCoauthor.isPlayer = true;
-                    authors.Add(playerCoauthor);
+                    playerCoauthor.IsPlayer = true;
+                    this.authors.Add(playerCoauthor);
                 }
 
                 author.Resolutions.Add(resolution);
+
                 if (coauthor != null)
                 {
                     coauthor.Resolutions.Add(resolution);
                 }
+
                 if (playerAuthor != null)
                 {
                     playerAuthor.Resolutions.Add(resolution);
-
                 }
+
                 if (playerCoauthor != null)
                 {
                     playerCoauthor.Resolutions.Add(resolution);
                 }
             }
 
-            foreach (Author author in authors)
+            foreach (Author author in this.authors)
             {
                 foreach (Resolution resolution in author.Resolutions)
                 {
-                    if (author.isPlayer)
+                    if (author.IsPlayer)
                     {
                         if (resolution.IsRepealed)
                         {
                             if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
                             {
-                                author.repealedAuthor += 1;
+                                author.RepealedAuthor += 1;
                             }
                             else if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name))
                             {
-                                author.repealedSubmittingCoauthor += 1;
+                                author.RepealedSubmittingCoauthor += 1;
                             }
                             else if (resolution.PlayerCoauthor.Equals(author.Name))
                             {
-                                author.repealedNonsubmittingCoauthor += 1;
+                                author.RepealedNonsubmittingCoauthor += 1;
                             }
                         }
                         else
                         {
                             if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name) && resolution.PlayerCoauthor == null && resolution.Coauthor == null)
                             {
-                                author.activeAuthor += 1;
+                                author.ActiveAuthor += 1;
                             }
                             else if (resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name))
                             {
-                                author.activeSubmittingCoauthor += 1;
+                                author.ActiveSubmittingCoauthor += 1;
                             }
                             else if (resolution.PlayerCoauthor.Equals(author.Name))
                             {
-                                author.activeNonsubmittingCoauthor += 1;
+                                author.ActiveNonsubmittingCoauthor += 1;
                             }
                         }
                     }
@@ -211,46 +291,49 @@ namespace Auralia.NationStates.ResolutionsDatabase
                         {
                             if (resolution.Author.Equals(author.Name) && resolution.Coauthor == null)
                             {
-                                author.repealedAuthor += 1;
+                                author.RepealedAuthor += 1;
                             }
                             else if (resolution.Author.Equals(author.Name))
                             {
-                                author.repealedSubmittingCoauthor += 1;
+                                author.RepealedSubmittingCoauthor += 1;
                             }
                             else if (resolution.Coauthor.Equals(author.Name))
                             {
-                                author.repealedNonsubmittingCoauthor += 1;
+                                author.RepealedNonsubmittingCoauthor += 1;
                             }
                         }
                         else
                         {
                             if (resolution.Author.Equals(author.Name) && resolution.Coauthor == null)
                             {
-                                author.activeAuthor += 1;
+                                author.ActiveAuthor += 1;
                             }
                             else if (resolution.Author.Equals(author.Name))
                             {
-                                author.activeSubmittingCoauthor += 1;
+                                author.ActiveSubmittingCoauthor += 1;
                             }
                             else if (resolution.Coauthor.Equals(author.Name))
                             {
-                                author.activeNonsubmittingCoauthor += 1;
+                                author.ActiveNonsubmittingCoauthor += 1;
                             }
                         }
                     }
                 }
             }
 
-            authors = authors.OrderBy(o => o.Name).ToList();
+            this.authors = this.authors.OrderBy(o => o.Name).ToList();
         }
 
-        public void generateGeneralAssemblyAuthorIndex()
+        /// <summary>
+        /// Generates the BBCode index for the authors.
+        /// </summary>
+        private void GenerateGeneralAssemblyAuthorIndex()
         {
-            string bbcode = "";
+            string bbcode = string.Empty;
 
-            foreach (var author in authors)
+            foreach (var author in this.authors)
             {
-                if (author.isPlayer)
+                if (author.IsPlayer)
                 {
                     bbcode += "[b][PLAYER] [nation]" + author.Name + "[/nation][/b]" + Environment.NewLine;
                 }
@@ -258,13 +341,12 @@ namespace Auralia.NationStates.ResolutionsDatabase
                 {
                     bbcode += "[b][nation]" + author.Name + "[/nation][/b]" + Environment.NewLine;
                 }
-
                 
                 bbcode += "[list]";
 
-                foreach (Resolution resolution in resolutions)
+                foreach (Resolution resolution in this.resolutions)
                 {
-                    if (author.isPlayer)
+                    if (author.IsPlayer)
                     {
                         if ((resolution.PlayerAuthor != null && resolution.PlayerAuthor.Equals(author.Name)) || (resolution.PlayerCoauthor != null && resolution.PlayerCoauthor.Equals(author.Name)))
                         {
@@ -311,47 +393,44 @@ namespace Auralia.NationStates.ResolutionsDatabase
                         }
                     }
                 }
+
                 bbcode += "[/list]" + Environment.NewLine + Environment.NewLine;
             }
 
-            if (!System.IO.Directory.Exists(OUTPUT_PATH))
+            if (!System.IO.Directory.Exists(this.outputPath))
             {
-                System.IO.Directory.CreateDirectory(OUTPUT_PATH);
+                System.IO.Directory.CreateDirectory(this.outputPath);
             }
 
-            StreamWriter file = new StreamWriter(OUTPUT_PATH + "\\index.txt");
+            StreamWriter file = new StreamWriter(this.outputPath + "\\index.txt");
             file.Write(bbcode);
             file.Close();
         }
 
-        public enum OrderType
-        {
-            Author = 1,
-            Total = 2,
-            ActiveTotal = 3,
-            RepealedTotal = 4
-        }
-
-        public void generateGeneralAssemblyAuthorTable(OrderType orderType)
+        /// <summary>
+        /// Generates the BBCode tables for the resolutions database.
+        /// </summary>
+        /// <param name="orderType">The order type of the table.</param>
+        private void GenerateGeneralAssemblyAuthorTable(OrderType orderType)
         {
             if (orderType == OrderType.Author)
             {
-                authors = authors.OrderBy(o => o.Name).ToList();
+                this.authors = this.authors.OrderBy(o => o.Name).ToList();
             }
             else if (orderType == OrderType.Total)
             {
-                authors = authors.OrderBy(o => o.Name).ToList();
-                authors = authors.OrderByDescending(o => o.total).ToList();
+                this.authors = this.authors.OrderBy(o => o.Name).ToList();
+                this.authors = this.authors.OrderByDescending(o => o.Total).ToList();
             }
             else if (orderType == OrderType.ActiveTotal)
             {
-                authors = authors.OrderBy(o => o.Name).ToList();
-                authors = authors.OrderByDescending(o => o.activeTotal).ToList();
+                this.authors = this.authors.OrderBy(o => o.Name).ToList();
+                this.authors = this.authors.OrderByDescending(o => o.ActiveTotal).ToList();
             }
             else if (orderType == OrderType.RepealedTotal)
             {
-                authors = authors.OrderBy(o => o.Name).ToList();
-                authors = authors.OrderByDescending(o => o.repealedTotal).ToList();
+                this.authors = this.authors.OrderBy(o => o.Name).ToList();
+                this.authors = this.authors.OrderByDescending(o => o.RepealedTotal).ToList();
             }
 
             var bbcode = "[table]";
@@ -359,18 +438,18 @@ namespace Auralia.NationStates.ResolutionsDatabase
             bbcode += "[tr]";
             bbcode += "[td][b]" + "Author" + "[/b][/td]";
             bbcode += "[td][b]" + "Active" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
             bbcode += "[td][b]" + "Repealed" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
             bbcode += "[td][b]" + "Total" + "[/b][/td]";
             bbcode += "[/tr]";
 
             bbcode += "[tr]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
             bbcode += "[td][b]" + "As author" + "[/b][/td]";
             bbcode += "[td][b]" + "As submitting co-author" + "[/b][/td]";
             bbcode += "[td][b]" + "As non-submitting co-author" + "[/b][/td]";
@@ -379,13 +458,14 @@ namespace Auralia.NationStates.ResolutionsDatabase
             bbcode += "[td][b]" + "As submitting co-author" + "[/b][/td]";
             bbcode += "[td][b]" + "As non-submitting co-author" + "[/b][/td]";
             bbcode += "[td][b]" + "Total" + "[/b][/td]";
-            bbcode += "[td][b]" + "" + "[/b][/td]";
+            bbcode += "[td][b]" + "[/b][/td]";
             bbcode += "[/tr]";
 
-            foreach (Author author in authors)
+            foreach (Author author in this.authors)
             {
                 bbcode += "[tr]";
-                if (author.isPlayer)
+
+                if (author.IsPlayer)
                 {
                     bbcode += "[td][PLAYER] [nation]" + author.Name + "[/nation][/td]";
                 }
@@ -393,20 +473,22 @@ namespace Auralia.NationStates.ResolutionsDatabase
                 {
                     bbcode += "[td][nation]" + author.Name + "[/nation][/td]";
                 }
-                bbcode += "[td]" + author.activeAuthor + "[/td]";
-                bbcode += "[td]" + author.activeSubmittingCoauthor + "[/td]";
-                bbcode += "[td]" + author.activeNonsubmittingCoauthor + "[/td]";
-                bbcode += "[td]" + author.activeTotal + "[/td]";
-                bbcode += "[td]" + author.repealedAuthor + "[/td]";
-                bbcode += "[td]" + author.repealedSubmittingCoauthor + "[/td]";
-                bbcode += "[td]" + author.repealedNonsubmittingCoauthor + "[/td]";
-                bbcode += "[td]" + author.repealedTotal + "[/td]";
-                bbcode += "[td]" + author.total + "[/td]";
+
+                bbcode += "[td]" + author.ActiveAuthor + "[/td]";
+                bbcode += "[td]" + author.ActiveSubmittingCoauthor + "[/td]";
+                bbcode += "[td]" + author.ActiveNonsubmittingCoauthor + "[/td]";
+                bbcode += "[td]" + author.ActiveTotal + "[/td]";
+                bbcode += "[td]" + author.RepealedAuthor + "[/td]";
+                bbcode += "[td]" + author.RepealedSubmittingCoauthor + "[/td]";
+                bbcode += "[td]" + author.RepealedNonsubmittingCoauthor + "[/td]";
+                bbcode += "[td]" + author.RepealedTotal + "[/td]";
+                bbcode += "[td]" + author.Total + "[/td]";
                 bbcode += "[/tr]";
             }
+
             bbcode += "[/table]";
 
-            StreamWriter file = new StreamWriter(OUTPUT_PATH + "\\table-" + (int)orderType + ".txt");
+            StreamWriter file = new StreamWriter(this.outputPath + "\\table-" + (int)orderType + ".txt");
             file.Write(bbcode);
             file.Close();
         }
