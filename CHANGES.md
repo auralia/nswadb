@@ -1,3 +1,7 @@
+## 0.2.3 ##
+
+* Changes to documentation
+
 ## 0.2.2 ##
 
 * Bug fixes
