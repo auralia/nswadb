@@ -1,10 +1,10 @@
 # nswadb #
 
 nswadb is a free and open source:
-* CSV database containing information on all General Assembly resolutions,
+* CSV database containing information on all General Assembly resolutions; and
 * set of Python scripts that generates a BBCode list of General Assembly 
   resolutions by author, as well as a number of associated BBCode tables 
-  containing statistical information
+  containing statistical information.
 
 ## License ##
 
