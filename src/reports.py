@@ -1,4 +1,5 @@
 from enum import Enum
+
 from src.db import Database
 
 
@@ -12,7 +13,7 @@ class OrderType(Enum):
 
 
 def generate_author_index(db: Database):
-    bbcode = ""
+    bbcode = ''
 
     authors = db.authors[:]
     authors.extend(db.player_authors)
@@ -21,33 +22,32 @@ def generate_author_index(db: Database):
     anchors = []
     for author in authors:
         if author.name[0] not in anchors:
-            bbcode += "[anchor=index-" + author.name[0] + "][/anchor]"
+            bbcode += f'[anchor=index-{author.name[0]}][/anchor]'
             anchors.append(author.name[0])
 
         if author.is_player:
-            bbcode += "[b][PLAYER] [nation]" + author.name + "[/nation][/b]\n"
+            bbcode += f'[b][PLAYER] [nation]{author.name}[/nation][/b]\n'
         else:
-            bbcode += "[b][nation]" + author.name + "[/nation][/b]\n"
+            bbcode += f'[b][nation]{author.name}[/nation][/b]\n'
 
-        bbcode += "[list]"
+        bbcode += '[list]'
 
         resolutions = author.authored_resolutions[:]
         resolutions.extend(author.coauthored_resolutions)
         resolutions.sort(key=lambda x: x.date)
         for resolution in resolutions:
-            entry = "[url=http://www.nationstates.net/" \
-                    "page=WA_past_resolutions/council=1/" \
-                    "start=" + str(resolution.number - 1) + "]" \
-                    + resolution.title + "[/url]"
+            entry = (f'[url=http://www.nationstates.net/'
+                     f'page=WA_past_resolutions/council=1/'
+                     f'start={resolution.number - 1}]{resolution.title}[/url]')
             if resolution.repealed_by is not None:
-                entry = "[strike]" + entry + "[/strike]"
+                entry = f'[strike]{entry}[/strike]'
             if resolution.coauthors:
                 if author in resolution.coauthors:
-                    entry += " (non-submitting co-author)"
+                    entry += ' (non-submitting co-author)'
                 else:
-                    entry += " (submitting co-author)"
-            bbcode += "[*]" + entry + "\n"
-        bbcode += "[/list]\n\n"
+                    entry += ' (submitting co-author)'
+            bbcode += f'[*]{entry}\n'
+        bbcode += '[/list]\n\n'
 
     print(bbcode)
 
@@ -68,101 +68,101 @@ def generate_author_table(db: Database, order_type: OrderType):
         authors.sort(key=lambda x: x.name)
         authors.reverse()
         authors.sort(key=lambda x: (
-            len(list(filter(lambda y: not y.repealed_by,
-                            x.authored_resolutions)))
-            + len(list(filter(lambda y: not y.repealed_by,
-                              x.coauthored_resolutions)))))
+                len(list(filter(lambda y: not y.repealed_by,
+                                x.authored_resolutions)))
+                + len(list(filter(lambda y: not y.repealed_by,
+                                  x.coauthored_resolutions)))))
         authors.reverse()
     elif order_type == OrderType.ACTIVE_NON_REPEALS_TOTAL:
         authors.sort(key=lambda x: x.name)
         authors.reverse()
         authors.sort(key=lambda x: (
-            len(list(filter(lambda y: not y.repealed_by and not y.repeal,
-                            x.authored_resolutions)))
-            + len(list(filter(lambda y: not y.repealed_by and not y.repeal,
-                              x.coauthored_resolutions)))))
+                len(list(filter(lambda y: not y.repealed_by and not y.repeal,
+                                x.authored_resolutions)))
+                + len(list(filter(lambda y: not y.repealed_by and not y.repeal,
+                                  x.coauthored_resolutions)))))
         authors.reverse()
     elif order_type == OrderType.ACTIVE_REPEALS_TOTAL:
         authors.sort(key=lambda x: x.name)
         authors.reverse()
         authors.sort(key=lambda x: (
-            len(list(filter(lambda y: not y.repealed_by and y.repeal,
-                            x.authored_resolutions)))
-            + len(list(filter(lambda y: not y.repealed_by and y.repeal,
-                              x.coauthored_resolutions)))))
+                len(list(filter(lambda y: not y.repealed_by and y.repeal,
+                                x.authored_resolutions)))
+                + len(list(filter(lambda y: not y.repealed_by and y.repeal,
+                                  x.coauthored_resolutions)))))
         authors.reverse()
     elif order_type == OrderType.REPEALED_TOTAL:
         authors.sort(key=lambda x: x.name)
         authors.reverse()
         authors.sort(key=lambda x: (
-            len(list(filter(lambda y: y.repealed_by,
-                            x.authored_resolutions)))
-            + len(list(filter(lambda y: y.repealed_by,
-                              x.coauthored_resolutions)))))
+                len(list(filter(lambda y: y.repealed_by,
+                                x.authored_resolutions)))
+                + len(list(filter(lambda y: y.repealed_by,
+                                  x.coauthored_resolutions)))))
         authors.reverse()
 
-    bbcode = "[table]"
+    bbcode = '[table]'
 
-    bbcode += "[tr]"
-    bbcode += "[td][b]" + "Author" + "[/b][/td]"
-    bbcode += "[td][b]" + "Active" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "Repealed" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "Total" + "[/b][/td]"
-    bbcode += "[/tr]"
+    bbcode += '[tr]'
+    bbcode += '[td][b]Author[/b][/td]'
+    bbcode += '[td][b]Active[/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b]Repealed[/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b]Total[/b][/td]'
+    bbcode += '[/tr]'
 
-    bbcode += "[tr]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "Non-repeals" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "Repeals" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "Total" + "[/b][/td]"
-    bbcode += "[td][b]" + "As author" + "[/b][/td]"
-    bbcode += "[td][b]" + "As submitting co-author" + "[/b][/td]"
-    bbcode += "[td][b]" + "As non-submitting co-author" + "[/b][/td]"
-    bbcode += "[td][b]" + "Total" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[/tr]"
+    bbcode += '[tr]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b]Non-repeals[/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b]Repeals[/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b]Total[/b][/td]'
+    bbcode += '[td][b]As author[/b][/td]'
+    bbcode += '[td][b]As submitting co-author[/b][/td]'
+    bbcode += '[td][b]As non-submitting co-author[/b][/td]'
+    bbcode += '[td][b]Total[/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[/tr]'
 
-    bbcode += "[tr]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "As author" + "[/b][/td]"
-    bbcode += "[td][b]" + "As submitting co-author" + "[/b][/td]"
-    bbcode += "[td][b]" + "As non-submitting co-author" + "[/b][/td]"
-    bbcode += "[td][b]" + "Total" + "[/b][/td]"
-    bbcode += "[td][b]" + "As author" + "[/b][/td]"
-    bbcode += "[td][b]" + "As submitting co-author" + "[/b][/td]"
-    bbcode += "[td][b]" + "As non-submitting co-author" + "[/b][/td]"
-    bbcode += "[td][b]" + "Total" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[td][b]" + "[/b][/td]"
-    bbcode += "[/tr]"
+    bbcode += '[tr]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b]As author[/b][/td]'
+    bbcode += '[td][b]As submitting co-author[/b][/td]'
+    bbcode += '[td][b]As non-submitting co-author[/b][/td]'
+    bbcode += '[td][b]Total[/b][/td]'
+    bbcode += '[td][b]As author[/b][/td]'
+    bbcode += '[td][b]As submitting co-author[/b][/td]'
+    bbcode += '[td][b]As non-submitting co-author[/b][/td]'
+    bbcode += '[td][b]Total[/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[td][b][/b][/td]'
+    bbcode += '[/tr]'
 
     for author in authors:
-        bbcode += "[tr]"
+        bbcode += '[tr]'
         if author.is_player:
-            bbcode += "[td][PLAYER] [nation]" + author.name + "[/nation][/td]"
+            bbcode += f'[td][PLAYER] [nation]{author.name}[/nation][/td]'
         else:
-            bbcode += "[td][nation]" + author.name + "[/nation][/td]"
+            bbcode += f'[td][nation]{author.name}[/nation][/td]'
 
         active_non_repeal_author = len(list(filter(
             lambda y: not y.repealed_by and not y.coauthors and not y.repeal,
@@ -176,10 +176,10 @@ def generate_author_table(db: Database, order_type: OrderType):
         active_non_repeal_total = (active_non_repeal_author
                                    + active_non_repeal_sub_coauthor
                                    + active_non_repeal_non_sub_coauthor)
-        bbcode += "[td]" + str(active_non_repeal_author) + "[/td]"
-        bbcode += "[td]" + str(active_non_repeal_sub_coauthor) + "[/td]"
-        bbcode += "[td]" + str(active_non_repeal_non_sub_coauthor) + "[/td]"
-        bbcode += "[td]" + str(active_non_repeal_total) + "[/td]"
+        bbcode += f'[td]{active_non_repeal_author}[/td]'
+        bbcode += f'[td]{active_non_repeal_sub_coauthor}[/td]'
+        bbcode += f'[td]{active_non_repeal_non_sub_coauthor}[/td]'
+        bbcode += f'[td]{active_non_repeal_total}[/td]'
 
         active_repeal_author = len(list(filter(
             lambda y: not y.coauthors and y.repeal,
@@ -193,13 +193,13 @@ def generate_author_table(db: Database, order_type: OrderType):
         active_repeal_total = (active_repeal_author
                                + active_repeal_sub_coauthor
                                + active_repeal_non_sub_coauthor)
-        bbcode += "[td]" + str(active_repeal_author) + "[/td]"
-        bbcode += "[td]" + str(active_repeal_sub_coauthor) + "[/td]"
-        bbcode += "[td]" + str(active_repeal_non_sub_coauthor) + "[/td]"
-        bbcode += "[td]" + str(active_repeal_total) + "[/td]"
+        bbcode += f'[td]{active_repeal_author}[/td]'
+        bbcode += f'[td]{active_repeal_sub_coauthor}[/td]'
+        bbcode += f'[td]{active_repeal_non_sub_coauthor}[/td]'
+        bbcode += f'[td]{active_repeal_total}[/td]'
 
         active_total = active_non_repeal_total + active_repeal_total
-        bbcode += "[td]" + str(active_total) + "[/td]"
+        bbcode += f'[td]{active_total}[/td]'
 
         repealed_author = len(list(filter(
             lambda y: y.repealed_by and not y.coauthors,
@@ -212,47 +212,36 @@ def generate_author_table(db: Database, order_type: OrderType):
             author.coauthored_resolutions)))
         repealed_total = (repealed_author + repealed_sub_coauthor
                           + repealed_non_sub_coauthor)
-        bbcode += "[td]" + str(repealed_author) + "[/td]"
-        bbcode += "[td]" + str(repealed_sub_coauthor) + "[/td]"
-        bbcode += "[td]" + str(repealed_non_sub_coauthor) + "[/td]"
-        bbcode += "[td]" + str(repealed_total) + "[/td]"
+        bbcode += f'[td]{repealed_author}[/td]'
+        bbcode += f'[td]{repealed_sub_coauthor}[/td]'
+        bbcode += f'[td]{repealed_non_sub_coauthor}[/td]'
+        bbcode += f'[td]{repealed_total}[/td]'
 
-        bbcode += "[td]" + str(active_total + repealed_total) + "[/td]"
-        bbcode += "[/tr]"
+        bbcode += f'[td]{active_total + repealed_total}[/td]'
+        bbcode += '[/tr]'
 
-    bbcode += "[/table]"
+    bbcode += '[/table]'
 
     print(bbcode)
 
 
 def generate_known_aliases(db: Database):
-    bbcode = "[table]"
+    bbcode = '[table]'
 
-    bbcode += "[tr]"
-    bbcode += "[td][b]" + "Player" + "[/b][/td]"
-    bbcode += "[td][b]" + "Aliases" + "[/b][/td]"
-    bbcode += "[/tr]"
+    bbcode += '[tr]'
+    bbcode += '[td][b]Player[/b][/td]'
+    bbcode += '[td][b]Aliases[/b][/td]'
+    bbcode += '[/tr]'
 
     players = sorted(list(db.aliases.keys()))
     for player in players:
-        bbcode += "[tr]"
-        bbcode += "[td]" + player + "[/td]"
-        aliases = ", ".join(["[nation]" + x + "[/nation]"
+        bbcode += '[tr]'
+        bbcode += f'[td]{player}[/td]'
+        aliases = ', '.join([f'[nation]{x}[/nation]'
                              for x in sorted(db.aliases[player])])
-        bbcode += "[td]" + aliases + "[/td]"
-        bbcode += "[/tr]"
+        bbcode += f'[td]{aliases}[/td]'
+        bbcode += '[/tr]'
 
-    bbcode += "[/table]"
+    bbcode += '[/table]'
 
     print(bbcode)
-
-
-database = Database.create("../db/resolutions.csv", "../db/aliases.csv")
-# generate_author_index(database)
-# generate_author_table(database, OrderType.AUTHOR)
-# generate_author_table(database, OrderType.TOTAL)
-# generate_author_table(database, OrderType.ACTIVE_TOTAL)
-# generate_author_table(database, OrderType.ACTIVE_NON_REPEALS_TOTAL)
-# generate_author_table(database, OrderType.ACTIVE_REPEALS_TOTAL)
-# generate_author_table(database, OrderType.REPEALED_TOTAL)
-# generate_known_aliases(database)
